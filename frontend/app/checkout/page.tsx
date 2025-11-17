@@ -35,7 +35,7 @@ export default function CheckoutPage() {
         .insert([
           {
             user_id: user.id,
-            total_amount: getTotal(),
+            total: getTotal(),
           },
         ])
         .select()
@@ -63,7 +63,7 @@ export default function CheckoutPage() {
       setMessage("✅ Order placed successfully!");
       setTimeout(() => router.push("/"), 2000);
     } catch (err: any) {
-      console.error(err);
+      console.error("Checkout Error:", JSON.stringify(err, null, 2));
       setMessage("❌ Failed to place order. Try again.");
     } finally {
       setLoading(false);

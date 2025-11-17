@@ -3,6 +3,7 @@ import ProductCard from "@/components/ProductCard";
 import CartSummary from "@/components/CartSummary";
 import StickyHeader from "@/components/StickyHeader";
 import UserHomeHeader from "@/components/UserHomeHeader";
+import Link from "next/link";
 
 interface Product {
   id: string;
@@ -13,35 +14,8 @@ interface Product {
   created_at?: string;
 }
 
-interface HomePageProps {
-  searchParams: {
-    sort?: string;
-  };
-}
-
-export default async function HomePage({ searchParams }: HomePageProps) {
-  // Get sort parameter from URL, default to 'default'
-  const sortBy = searchParams.sort || 'default';
-  
-  let query = supabase.from("products").select("*");
-  
-  // Apply sorting based on URL parameter
-  switch (sortBy) {
-    case 'price_low':
-      query = query.order('price', { ascending: true });
-      break;
-    case 'price_high':
-      query = query.order('price', { ascending: false });
-      break;
-    case 'newest':
-      query = query.order('created_at', { ascending: false });
-      break;
-    default:
-      // Default sorting (by created_at descending for newest first)
-      query = query.order('created_at', { ascending: false });
-  }
-
-  const { data: products, error } = await query;
+export default async function HomePage() {
+  const { data: products, error } = await supabase.from("products").select("*");
 
   if (error) {
     return (
@@ -79,9 +53,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-16">
         <UserHomeHeader />
-        {/* Hero Section */}
-        <section className="bg-linear-to-r from-blue-600 to-purple-700 dark:from-blue-800 dark:to-purple-900 text-white py-16">
-          <div className="container mx-auto px-4 text-center">
+        
+        {/* Hero Section with Cart CTA */}
+        <section className="bg-linear-to-r from-blue-600 to-purple-700 dark:from-blue-800 dark:to-purple-900 text-white py-16 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full"></div>
+            <div className="absolute bottom-10 right-10 w-32 h-32 bg-white rounded-full"></div>
+            <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white rounded-full"></div>
+          </div>
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
             <h1 className="text-5xl font-bold mb-4 tracking-tight">
               Welcome to Our Store
             </h1>
@@ -89,6 +71,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               Discover premium quality products with exceptional value. 
               Shop with confidence and enjoy fast delivery.
             </p>
+            
+            {/* Hero CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+              <Link 
+                href="/cart"
+                className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-3"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                View Cart & Checkout
+              </Link>
+              
+              <Link 
+                href="#products"
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-200 transform hover:scale-105"
+              >
+                Browse Products
+              </Link>
+            </div>
+            
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
                 🚚 Free shipping on orders over $50
@@ -104,7 +107,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         {/* Products Section */}
-        <section className="container mx-auto px-4 -mt-8 relative z-10">
+        <section id="products" className="container mx-auto px-4 py-8 relative z-10">
           {/* Stats Bar */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -117,32 +120,34 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </p>
               </div>
               
-              {/* Sorting and Filtering */}
-              <div className="flex gap-3">
-                <form>
-                  <select 
-                    name="sort"
-                    defaultValue={sortBy}
-                    onChange={(e) => {
-                      // This will trigger a page reload with the new sort parameter
-                      const form = e.target.form;
-                      if (form) form.submit();
-                    }}
-                    className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300"
-                  >
-                    <option value="default">Sort by: Default</option>
-                    <option value="price_low">Price: Low to High</option>
-                    <option value="price_high">Price: High to Low</option>
-                    <option value="newest">Newest First</option>
-                  </select>
-                </form>
-                
-                <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+              <div className="flex items-center gap-4">
+                {/* Quick Cart Navigation */}
+                <Link 
+                  href="/cart"
+                  className="hidden sm:flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Filters
-                </button>
+                  Go to Cart
+                </Link>
+                
+                {/* Sorting and Filtering Placeholder */}
+                <div className="flex gap-3">
+                  <select className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    <option>Sort by: Featured</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                    <option>Newest First</option>
+                  </select>
+                  
+                  <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                    </svg>
+                    Filters
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -163,9 +168,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   We're currently updating our inventory. Please check back soon for new arrivals!
                 </p>
                 <div className="flex gap-3 justify-center">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                    Notify Me
-                  </button>
+                  <Link 
+                    href="/cart"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Check Your Cart
+                  </Link>
                   <button 
                     onClick={() => window.location.reload()}
                     className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
@@ -182,6 +193,34 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 {products?.map((product: Product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
+              </div>
+
+              {/* Bottom Cart CTA */}
+              <div className="bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-8 text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  Ready to Complete Your Order?
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                  Review your cart items and proceed to secure checkout with multiple payment options available.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link 
+                    href="/cart"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3 text-lg"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    View Cart & Checkout
+                  </Link>
+                  
+                  <Link 
+                    href="/checkout"
+                    className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-white px-8 py-4 rounded-lg font-semibold transition-colors text-lg"
+                  >
+                    Direct Checkout
+                  </Link>
+                </div>
               </div>
             </>
           )}
