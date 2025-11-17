@@ -52,7 +52,7 @@ export default async function HomePage() {
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-16">
         {/* Hero Section */}
         <section className="bg-linear-to-r from-blue-600 to-purple-700 dark:from-blue-800 dark:to-purple-900 text-white py-16">
-          <div className="container mx-auto px-4 text-center">
+          <div className="mt-15 container mx-auto px-4 text-center">
             <h1 className="text-5xl font-bold mb-4 tracking-tight">
               Welcome to Our Store
             </h1>
