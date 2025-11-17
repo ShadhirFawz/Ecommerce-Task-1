@@ -1,7 +1,28 @@
 "use client";
 import React, { createContext, useState, useEffect } from "react";
 
-export const CartContext = createContext({
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  image_url: string;
+  description?: string;
+}
+
+interface CartItem extends Product {
+  quantity: number;
+}
+
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: Product, qty?: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getTotal: () => number;
+}
+
+export const CartContext = createContext<CartContextType>({
   cart: [],
   addToCart: () => {},
   removeFromCart: () => {},
@@ -10,8 +31,8 @@ export const CartContext = createContext({
   getTotal: () => 0,
 });
 
-export default function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+export default function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   // load from localStorage once
   useEffect(() => {
@@ -32,7 +53,7 @@ export default function CartProvider({ children }) {
     }
   }, [cart]);
 
-  const addToCart = (product, qty = 1) => {
+  const addToCart = (product: Product, qty: number = 1) => {
     setCart((prev) => {
       const existing = prev.find((p) => p.id === product.id);
       if (existing) {
@@ -44,11 +65,11 @@ export default function CartProvider({ children }) {
     });
   };
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId: string) => {
     setCart((prev) => prev.filter((p) => p.id !== productId));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -60,7 +81,6 @@ export default function CartProvider({ children }) {
 
   const getTotal = () => {
     return cart.reduce((sum, item) => {
-      // price might be stored as string from PG numeric; coerce to number
       const price = Number(item.price ?? 0);
       return sum + price * (item.quantity ?? 1);
     }, 0);
