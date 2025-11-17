@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ProductCard from "@/components/ProductCard";
 import CartSummary from "@/components/CartSummary";
@@ -12,12 +15,98 @@ interface Product {
   image_url: string;
   description?: string;
   created_at?: string;
+  category?: string;
 }
 
-export default async function HomePage() {
-  const { data: products, error } = await supabase.from("products").select("*");
+export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("featured");
+  const [priceRange, setPriceRange] = useState("all");
 
-  if (error) {
+  // Fetch products
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.from("products").select("*");
+      
+      if (error) {
+        throw error;
+      }
+      
+      setProducts(data || []);
+      setFilteredProducts(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Apply filters whenever search, sort, or price range changes
+  useEffect(() => {
+    let filtered = [...products];
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply price range filter
+    if (priceRange !== "all") {
+      filtered = filtered.filter(product => {
+        switch (priceRange) {
+          case "under25":
+            return product.price < 25;
+          case "25to50":
+            return product.price >= 25 && product.price <= 50;
+          case "over50":
+            return product.price > 50;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "price-low":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        filtered.sort((a, b) => new Date(b.created_at || "").getTime() - new Date(a.created_at || "").getTime());
+        break;
+      case "featured":
+      default:
+        // Keep original order or any default sorting
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  }, [searchTerm, sortBy, priceRange, products]);
+
+  const handleRefresh = () => {
+    fetchProducts();
+    // Reset filters
+    setSearchTerm("");
+    setSortBy("featured");
+    setPriceRange("all");
+  };
+
+  if (error && products.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center max-w-md mx-auto p-6">
@@ -33,7 +122,7 @@ export default async function HomePage() {
             We're having trouble loading our products. Please try again later.
           </p>
           <button 
-            onClick={() => window.location.reload()}
+            onClick={handleRefresh}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Try Again
@@ -49,7 +138,7 @@ export default async function HomePage() {
       <CartSummary />
       
       {/* Sticky Header with Products Count */}
-      <StickyHeader productsCount={products?.length || 0} />
+      <StickyHeader productsCount={filteredProducts.length} />
       
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-16">
         <UserHomeHeader />
@@ -116,7 +205,8 @@ export default async function HomePage() {
                   Featured Products
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {products?.length || 0} products available
+                  {filteredProducts.length} of {products.length} products
+                  {searchTerm && ` matching "${searchTerm}"`}
                 </p>
               </div>
               
@@ -132,28 +222,79 @@ export default async function HomePage() {
                   Go to Cart
                 </Link>
                 
-                {/* Sorting and Filtering Placeholder */}
-                <div className="flex gap-3">
-                  <select className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    <option>Sort by: Featured</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Newest First</option>
-                  </select>
-                  
-                  <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-                    </svg>
-                    Filters
-                  </button>
-                </div>
               </div>
             </div>
+
+            {/* Filters Row */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Search Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pl-10 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <svg className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+
+              {/* Price Range Filter */}
+              <select 
+                value={priceRange}
+                onChange={(e) => setPriceRange(e.target.value)}
+                className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Prices</option>
+                <option value="under25">Under $25</option>
+                <option value="25to50">$25 - $50</option>
+                <option value="over50">Over $50</option>
+              </select>
+
+              {/* Sort By */}
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="featured">Sort by: Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
+
+            {/* Clear Filters */}
+            {(searchTerm || priceRange !== "all" || sortBy !== "featured") && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setPriceRange("all");
+                    setSortBy("featured");
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer font-medium flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Clear all filters
+                </button>
+              </div>
+            )}
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+
           {/* Products Grid */}
-          {products?.length === 0 ? (
+          {!loading && filteredProducts.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -162,67 +303,72 @@ export default async function HomePage() {
                   </svg>
                 </div>
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                  No Products Available
+                  No Products Found
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  We're currently updating our inventory. Please check back soon for new arrivals!
+                  {searchTerm 
+                    ? `No products found matching "${searchTerm}". Try adjusting your search terms.`
+                    : "No products match your current filters. Try adjusting your filters."}
                 </p>
                 <div className="flex gap-3 justify-center">
-                  <Link 
-                    href="/cart"
+                  <button 
+                    onClick={() => {
+                      setSearchTerm("");
+                      setPriceRange("all");
+                      setSortBy("featured");
+                    }}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Check Your Cart
-                  </Link>
+                    Clear Filters
+                  </button>
                   <button 
-                    onClick={() => window.location.reload()}
+                    onClick={handleRefresh}
                     className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
                   >
-                    Refresh
+                    Refresh Products
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            <>
-              {/* Products Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-                {products?.map((product: Product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-
-              {/* Bottom Cart CTA */}
-              <div className="bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-8 text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                  Ready to Complete Your Order?
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Review your cart items and proceed to secure checkout with multiple payment options available.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link 
-                    href="/cart"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3 text-lg"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    View Cart & Checkout
-                  </Link>
-                  
-                  <Link 
-                    href="/checkout"
-                    className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-white px-8 py-4 rounded-lg font-semibold transition-colors text-lg"
-                  >
-                    Direct Checkout
-                  </Link>
+            !loading && (
+              <>
+                {/* Products Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+                  {filteredProducts.map((product: Product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
                 </div>
-              </div>
-            </>
+
+                {/* Bottom Cart CTA */}
+                <div className="bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-8 text-center mb-8">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    Ready to Complete Your Order?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                    Review your cart items and proceed to secure checkout with multiple payment options available.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Link 
+                      href="/cart"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3 text-lg"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      View Cart & Checkout
+                    </Link>
+                    
+                    <Link 
+                      href="/checkout"
+                      className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-white px-8 py-4 rounded-lg font-semibold transition-colors text-lg"
+                    >
+                      Direct Checkout
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )
           )}
         </section>
 

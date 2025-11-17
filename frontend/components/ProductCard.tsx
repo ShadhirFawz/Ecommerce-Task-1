@@ -27,7 +27,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.id}`}>
         <div className="relative overflow-hidden rounded-md mb-3 cursor-pointer">
           <img
-            src={product?.image_url || "https://via.placeholder.com/300x200"}
+            src={product?.image_url || "/camera-placeholder.svg"}
             alt={product.title}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
