@@ -11,7 +11,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="mt-15 container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -24,7 +24,7 @@ export default function CartPage() {
           {cart.length > 0 && (
             <button
               onClick={clearCart}
-              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium flex items-center gap-2 transition-colors"
+              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer font-medium flex items-center gap-2 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

@@ -61,6 +61,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await supabase.auth.signOut();
+    window.dispatchEvent(new Event("user-logged-out"));
   };
 
   return (

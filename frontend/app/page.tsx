@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabaseClient";
 import ProductCard from "@/components/ProductCard";
 import CartSummary from "@/components/CartSummary";
 import StickyHeader from "@/components/StickyHeader";
+import UserHomeHeader from "@/components/UserHomeHeader";
 
 interface Product {
   id: string;
@@ -12,8 +13,35 @@ interface Product {
   created_at?: string;
 }
 
-export default async function HomePage() {
-  const { data: products, error } = await supabase.from("products").select("*");
+interface HomePageProps {
+  searchParams: {
+    sort?: string;
+  };
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  // Get sort parameter from URL, default to 'default'
+  const sortBy = searchParams.sort || 'default';
+  
+  let query = supabase.from("products").select("*");
+  
+  // Apply sorting based on URL parameter
+  switch (sortBy) {
+    case 'price_low':
+      query = query.order('price', { ascending: true });
+      break;
+    case 'price_high':
+      query = query.order('price', { ascending: false });
+      break;
+    case 'newest':
+      query = query.order('created_at', { ascending: false });
+      break;
+    default:
+      // Default sorting (by created_at descending for newest first)
+      query = query.order('created_at', { ascending: false });
+  }
+
+  const { data: products, error } = await query;
 
   if (error) {
     return (
@@ -50,9 +78,10 @@ export default async function HomePage() {
       <StickyHeader productsCount={products?.length || 0} />
       
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-16">
+        <UserHomeHeader />
         {/* Hero Section */}
         <section className="bg-linear-to-r from-blue-600 to-purple-700 dark:from-blue-800 dark:to-purple-900 text-white py-16">
-          <div className="mt-15 container mx-auto px-4 text-center">
+          <div className="container mx-auto px-4 text-center">
             <h1 className="text-5xl font-bold mb-4 tracking-tight">
               Welcome to Our Store
             </h1>
@@ -88,14 +117,25 @@ export default async function HomePage() {
                 </p>
               </div>
               
-              {/* Sorting and Filtering Placeholder */}
+              {/* Sorting and Filtering */}
               <div className="flex gap-3">
-                <select className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                  <option>Sort by: Featured</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Newest First</option>
-                </select>
+                <form>
+                  <select 
+                    name="sort"
+                    defaultValue={sortBy}
+                    onChange={(e) => {
+                      // This will trigger a page reload with the new sort parameter
+                      const form = e.target.form;
+                      if (form) form.submit();
+                    }}
+                    className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <option value="default">Sort by: Default</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                  </select>
+                </form>
                 
                 <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,13 +183,12 @@ export default async function HomePage() {
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-
             </>
           )}
         </section>
 
         {/* Features Section */}
-        <section className="bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-12">
+        <section className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-12">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div className="p-6">

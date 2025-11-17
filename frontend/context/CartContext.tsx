@@ -1,5 +1,7 @@
 "use client";
 import React, { createContext, useState, useEffect } from "react";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 interface Product {
   id: string;
@@ -32,6 +34,7 @@ export const CartContext = createContext<CartContextType>({
 });
 
 export default function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useContext(AuthContext);
   const [cart, setCart] = useState<CartItem[]>([]);
 
   // load from localStorage once
@@ -42,6 +45,15 @@ export default function CartProvider({ children }: { children: React.ReactNode }
     } catch (e) {
       console.error("Failed to load cart from localStorage", e);
     }
+  }, []);
+
+  useEffect(() => {
+    const clearOnLogout = () => {
+      setCart([]);            // reset state
+      localStorage.removeItem("cart"); // clear persistent cart
+    };
+    window.addEventListener("user-logged-out", clearOnLogout);
+    return () => window.removeEventListener("user-logged-out", clearOnLogout);
   }, []);
 
   // persist on change
