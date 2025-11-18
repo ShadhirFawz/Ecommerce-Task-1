@@ -2,6 +2,7 @@
 import { useContext } from "react";
 import { CartContext } from "@/context/CartContext";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface Product {
   id: string;
@@ -47,7 +48,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
       )}
 
-      <button
+      <Button
         onClick={handleAddToCart}
         className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-3 cursor-pointer rounded-md font-medium transition-colors duration-200 flex items-center justify-center gap-2"
       >
@@ -55,7 +56,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
         Add to Cart
-      </button>
+      </Button>
     </div>
   );
 }
