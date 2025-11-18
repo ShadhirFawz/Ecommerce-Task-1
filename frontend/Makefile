@@ -1,15 +1,5 @@
 .PHONY: install dev build lint help
 
-# Default target
-help:
-	@echo "Available commands:"
-	@echo "  make install    - Install dependencies"
-	@echo "  make dev        - Start development server"
-	@echo "  make build      - Build for production"
-	@echo "  make lint       - Run linting"
-	@echo "  make clean      - Clean build artifacts and node_modules"
-	@echo "  make help       - Show this help message"
-
 # Install dependencies
 install:
 	@echo "Installing dependencies..."
@@ -39,3 +29,12 @@ clean:
 test:
 	@echo "Running tests..."
 	pnpm test
+
+# Install any package by name
+install-pkg:
+ifndef pkg
+	@echo "Error: Please specify package name. Usage: make install-pkg pkg=package-name"
+	@exit 1
+endif
+	@echo "Installing package: $(pkg)"
+	pnpm add $(pkg)
