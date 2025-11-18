@@ -4,6 +4,7 @@ import { useContext, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -42,7 +43,8 @@ export default function Navbar() {
           {/* Auth Condition */}
           {user ? (
             <div className="relative" ref={dropdownRef}>
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setOpen((prev) => !prev)}
                 className="flex items-center gap-2 px-3 py-1 border rounded-md cursor-pointer 
                 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -72,7 +74,7 @@ export default function Navbar() {
                     d="M19 9l-7 7-7-7"
                   />
                 </svg>
-              </button>
+              </Button>
 
               {/* Dropdown */}
               {open && (
@@ -85,21 +87,21 @@ export default function Navbar() {
                     Profile
                   </Link>
 
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 cursor-pointer dark:hover:bg-red-900/20"
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 cursor-pointer dark:hover:bg-red-900/20 justify-start"
                   >
                     Logout
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
           ) : (
-            <Link
-              href="/auth/login"
-              className="text-sm text-blue-600 dark:text-blue-400 border border-blue-400 px-3 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            >
-              Login
+            <Link href="/auth/login">
+              <Button variant="outline" className="text-sm text-blue-600 dark:text-blue-400 border border-blue-400 px-6 py-3 rounded-md cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                Login
+              </Button>
             </Link>
           )}
         </div>

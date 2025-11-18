@@ -4,6 +4,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -110,17 +111,13 @@ export default function SignupPage() {
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 mt-4 text-white rounded-lg cursor-pointer transition-all ${
-              loading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            className="w-full py-6 mt-4 text-white bg-blue-900 hover:bg-blue-950 rounded-lg cursor-pointer transition-all"
           >
             {loading ? "Creating account..." : "Sign Up"}
-          </button>
+          </Button>
         </form>
 
         <p className="text-center text-gray-600 dark:text-gray-300 cursor-pointer mt-4 text-sm">

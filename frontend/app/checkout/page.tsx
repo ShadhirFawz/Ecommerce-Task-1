@@ -6,6 +6,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { CartContext } from "@/context/CartContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { supabase } from "@/lib/supabaseClient";
+import { Button } from "@/components/ui/button";
 
 export default function CheckoutPage() {
   const { user } = useContext(AuthContext);
@@ -112,17 +113,13 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              <button
+              <Button
                 onClick={handleCheckout}
                 disabled={loading}
-                className={`w-full mt-6 py-3 rounded-lg font-semibold text-white cursor-pointer transition-all ${
-                  loading
-                    ? "bg-blue-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className="w-full mt-6 py-3 rounded-lg font-semibold text-white cursor-pointer transition-all"
               >
                 {loading ? "Processing..." : "Place Order"}
-              </button>
+              </Button>
 
               {message && (
                 <p

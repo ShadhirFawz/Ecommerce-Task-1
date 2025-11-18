@@ -3,6 +3,7 @@
 import { useContext } from "react";
 import { CartContext } from "@/context/CartContext";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, getTotal, clearCart } = useContext(CartContext);
@@ -22,7 +23,8 @@ export default function CartPage() {
           </div>
           
           {cart.length > 0 && (
-            <button
+            <Button
+              variant="ghost"
               onClick={clearCart}
               className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer font-medium flex items-center gap-2 transition-colors"
             >
@@ -30,7 +32,7 @@ export default function CartPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
               Clear Cart
-            </button>
+            </Button>
           )}
         </div>
 
@@ -49,14 +51,13 @@ export default function CartPage() {
               <p className="text-gray-600 dark:text-gray-400 mb-8">
                 Looks like you haven't added any items to your cart yet.
               </p>
-              <Link 
-                href="/"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Start Shopping
+              <Link href="/">
+                <Button className="inline-flex items-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Start Shopping
+                </Button>
               </Link>
             </div>
           </div>
@@ -95,7 +96,9 @@ export default function CartPage() {
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Qty:</span>
                         <div className="flex items-center gap-2">
-                          <button
+                          <Button
+                            variant="outline"
+                            size="icon"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                             disabled={item.quantity <= 1}
@@ -103,26 +106,30 @@ export default function CartPage() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                             </svg>
-                          </button>
+                          </Button>
                           <span className="font-semibold w-8 text-center">{item.quantity}</span>
-                          <button
+                          <Button
+                            variant="outline"
+                            size="icon"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
-                          </button>
+                          </Button>
                         </div>
                       </div>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => removeFromCart(item.id)}
                         className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 transition-colors"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -132,7 +139,9 @@ export default function CartPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</span>
                       <div className="flex items-center gap-2">
-                        <button
+                        <Button
+                          variant="outline"
+                          size="icon"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="w-10 h-10 flex items-center justify-center cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                           disabled={item.quantity <= 1}
@@ -140,16 +149,18 @@ export default function CartPage() {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                           </svg>
-                        </button>
+                        </Button>
                         <span className="font-semibold text-lg w-8 text-center">{item.quantity}</span>
-                        <button
+                        <Button
+                          variant="outline"
+                          size="icon"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="w-10 h-10 flex items-center justify-center cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                           </svg>
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
@@ -161,7 +172,9 @@ export default function CartPage() {
                     </div>
 
                     {/* Remove Button */}
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => removeFromCart(item.id)}
                       className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer p-2 transition-colors"
                       title="Remove item"
@@ -169,7 +182,7 @@ export default function CartPage() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -205,19 +218,18 @@ export default function CartPage() {
                 </div>
 
                 <Link href="/checkout">
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold cursor-pointer py-4 rounded-lg text-lg transition-colors duration-200 flex items-center justify-center gap-2 mb-4">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold cursor-pointer py-6 rounded-lg text-lg transition-colors duration-200 flex items-center justify-center gap-2 mb-4">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Proceed to Checkout
-                  </button>
+                  </Button>
                 </Link>
 
-                <Link 
-                  href="/"
-                  className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium cursor-pointer py-3 rounded-lg text-center block transition-colors duration-200"
-                >
-                  Continue Shopping
+                <Link href="/">
+                  <Button variant="outline" className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium cursor-pointer py-5 rounded-lg text-center transition-colors duration-200">
+                    Continue Shopping
+                  </Button>
                 </Link>
               </div>
             </div>
