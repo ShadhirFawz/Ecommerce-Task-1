@@ -68,7 +68,7 @@ export default function CartSummary() {
             <p className="text-sm opacity-90">{itemCount} items • ${total.toFixed(2)}</p>
           </div>
           <Link href="/cart">
-            <button className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm font-medium transition-colors ml-2">
+            <button className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm font-medium cursor-pointer transition-colors ml-2">
               View
             </button>
           </Link>
