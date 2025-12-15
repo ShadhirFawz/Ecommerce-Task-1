@@ -1,0 +1,8 @@
+{
+  "eslint.options": {
+    "overrideConfigFile": "C:/Users/shadh/Documents/Xennex/Day 1/Task 1/Ecommerce/frontend/eslint.config.mjs"
+  },
+  "eslint.codeAction.showDocumentation": {
+    "enable": false
+  }
+}
