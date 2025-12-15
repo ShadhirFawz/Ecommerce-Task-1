@@ -5,6 +5,8 @@ import {
   AuthUserSchema,
   AuthMessageSchema,
 } from "./schemas/auth.schema";
+import { CartSchema } from "./schemas/cart.schema";
+import { CreateOrderSchema, OrderSchema } from "./schemas/order.schema";
 
 const registry = new OpenAPIRegistry();
 
@@ -113,6 +115,59 @@ registry.registerPath({
         },
       },
     },
+  },
+});
+
+/**
+ * -----------------------
+ * Cart Endpoints
+ * -----------------------
+ */
+registry.registerPath({
+  method: "get",
+  path: "/cart",
+  description: "Client-side cart stored in localStorage (not persisted on server)",
+  responses: {
+    200: {
+      description: "Current cart state",
+      content: {
+        "application/json": {
+          schema: CartSchema,
+        },
+      },
+    },
+  },
+});
+
+/**
+ * -----------------------
+ * Checkout Endpoints
+ * -----------------------
+ */
+registry.registerPath({
+  method: "post",
+  path: "/orders",
+  description: "Create a new order from cart items",
+  security: [{ bearerAuth: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: CreateOrderSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Order successfully created",
+      content: {
+        "application/json": {
+          schema: OrderSchema,
+        },
+      },
+    },
+    401: { description: "Unauthorized" },
   },
 });
 
